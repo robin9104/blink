@@ -9,12 +9,12 @@ Blink::Blink(int pin)
 
 void Blink::on(int msec)
 {
-	delay(msec);
 	digitalWrite(_pin, HIGH);
+	delay(msec);
 }
 
 void Blink::off(int msec)
 {
-	delay(msec);
 	digitalWrite(_pin, LOW);
+	delay(msec);
 }
