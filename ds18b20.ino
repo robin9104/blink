@@ -6,23 +6,41 @@
 #include <DallasTemperature.h>
 
 #define ONE_WIRE_BUS D4
+#define interval 5000
+//#define ThingSpeak
+#define IFTTT
 
+#ifdef IFTTT
+const char *host = "maker.ifttt.com";
+String url = "/trigger/Temperature/with/key/cgYHPahzPx9-zVtwe7tzXE";
+#endif
+
+#ifdef ThingSpeak
 const char *host = "api.thingspeak.com";
 String url = "/update?api_key=W6T9O0NX4UEFJ55H";
+#endif
+
 const int httpPort = 80;
-int interval = 60000;
 
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature DS18B20(&oneWire);
 
-const char *ssid = "olleh_WiFi_88DF";
-const char *password = "0000007063";
+const char *ssid = "Seolgi";
+const char *password = "12345678900";
 
 char temperatureString[6];
 
+#ifdef IFTTT
+String working(String data){
+  return (String("value1=")+String(data));
+}
+#endif
+
+#ifdef ThingSpeak
 String working(String data){
   return (String("field1=")+String(data));
 }
+#endif
 
 void delivering(String payload)
 {
@@ -36,6 +54,23 @@ void delivering(String payload)
     return;
   }
 
+#ifdef IFTTT
+  String getheader = "GET " + String(url) + "?" + String(payload) + " HTTP/1.1";
+  client.println(getheader);
+  client.println("User-Agent: ESP8266 Seolgi Kim");
+  client.println("Host: " + String(host));
+  client.println("Connection: close");
+  client.println();
+
+  Serial.println(getheader);
+  while (client.connected())
+  {
+    String line = client.readStringUntil('\n');
+    Serial.println(line);
+  }
+#endif
+
+#ifdef ThingSpeak
   String getheader = "GET " + String(url) + "&" + String(payload) + " HTTP/1.1";
   client.println(getheader);
   client.println("User-Agent: ESP8266 Seolgi Kim");
@@ -49,6 +84,7 @@ void delivering(String payload)
     String line = client.readStringUntil('\n');
     Serial.println(line);
   }
+#endif
   Serial.println("Done cycle.");
 }
 
@@ -82,7 +118,13 @@ float getTemperature()
 void setup() {
   Serial.begin(115200);
   connect_ap();
-  Serial.println("ESPArduionoThingSpeak.cpp - 2018/03/07");
+#ifdef IFTTT
+  Serial.println("ESPArduinoIFTTT - 2018/03/16");
+#endif
+
+#ifdef ThingSpeak
+  Serial.println("ESPArduinoThingSpeak - 2018/03/07");
+#endif
 
   DS18B20.begin();
 }
